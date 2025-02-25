@@ -19,7 +19,26 @@ class DetailViewController: UIViewController {
         return [pinkButton, yellowButton, greenButton, blueButton, purpleButton]
     }()
     
-    @IBOutlet weak var saveButton: UIBarButtonItem!
+    private lazy var shareButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(shareButtonTapped))
+        return button
+    }()
+    private lazy var saveButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(saveButtonTapped))
+        return button
+    }()
+    private lazy var menuButton: UIBarButtonItem = {
+        let menu = UIMenu(children: [
+            UIAction(title: "메모 잠금", image: UIImage(systemName: "lock"), handler: self.lockButtonTapped),
+            UIAction(title: "메모 이동", image: UIImage(systemName: "folder"), handler: self.moveButtonTapped),
+            UIAction(title: "메모 삭제", image: UIImage(systemName: "trash")?.withTintColor(.red, renderingMode: .alwaysOriginal), handler: self.removeButtonTapped)
+            ])
+        
+        let button = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: menu)
+        return button
+    }()
+    
+    
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var textView: UITextView!
     
@@ -42,6 +61,7 @@ class DetailViewController: UIViewController {
         // Do any additional setup after loading the view.
         setup()
         configureUI()
+        setupBarButtonItems()
     }
     
     func setup() {
@@ -55,13 +75,24 @@ class DetailViewController: UIViewController {
             saveButton.title = "복원"
         } else {
             textView.isEditable = true
-            saveButton.title = "저장"
+            saveButton.title = "완료"
         }
         
         //버튼 색 세팅
         (0..<5).forEach {
             buttons[$0].backgroundColor = MemoColor(rawValue: Int64($0 + 1))!.backgroundColor
         }
+    }
+    
+    func setupBarButtonItems() {
+        shareButton.isEnabled = !textView.text.isEmpty
+        if let _ = self.memo { //수정 모드
+            self.navigationItem.rightBarButtonItems = [menuButton, shareButton]
+        } else { //생성 모드
+            self.navigationItem.rightBarButtonItems = [saveButton, shareButton]
+        }
+        
+        
     }
     
     func configureUI() {
@@ -99,9 +130,6 @@ class DetailViewController: UIViewController {
     
     func setColorTheme(color: MemoColor? = .pink) {
         view.backgroundColor = color?.backgroundColor
-        
-        //수정 필요
-        //navigationController?.navigationBar.barTintColor = color?.navigationBarColor
     }
     
     @IBAction func colorButtonTapped(_ sender: UIButton) {
@@ -113,32 +141,51 @@ class DetailViewController: UIViewController {
     
     }
     
-    @IBAction func saveButtonTapped(_ sender: UIBarButtonItem) {
-        if saveButton.title == "저장" {
+    @objc func shareButtonTapped() {
+        
+    }
+    
+    @objc func saveButtonTapped() {
+        if saveButton.title == "완료" {
             if let memo = self.memo {
+                print(textView.text)
                 memo.text = textView.text
                 memo.color = tmpColor ?? 1
                 coreDataManager.updateMemo(memo: memo) {
                     
                 }
             } else {
-                let text = textView.text
-                if (text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+                if textView.text.isEmpty {
                     // 텍스트뷰가 비어있거나 공백, 개행 문자만 포함되어 있음 -> 저장 안함
+                    self.navigationItem.rightBarButtonItems = [shareButton]
+                    textView.resignFirstResponder()
                     return
                 }
                 
                 guard let folder = self.folder else { return }
-                coreDataManager.addMemo(text: text, color: tmpColor ?? 1, folder: folder, date: nowDate) {
+                coreDataManager.addMemo(text: textView.text, color: tmpColor ?? 1, folder: folder, date: nowDate) {
                     //중복 저장 방지
                     self.memo = self.memoFetch(self)
                 }
             }
             textView.resignFirstResponder()
+            self.navigationItem.rightBarButtonItems = [menuButton, shareButton]
         } else if saveButton.title == "복원" {
             //이동할 폴더 선택
             performSegue(withIdentifier: Segue.moveMemoInDetailViewIdentifier, sender: self)
         }
+        
+    }
+    
+    func lockButtonTapped(_ action: UIAction) {
+        
+    }
+    
+    func moveButtonTapped(_ action: UIAction) {
+        
+    }
+    
+    func removeButtonTapped(_ action: UIAction) {
         
     }
     
@@ -156,5 +203,12 @@ class DetailViewController: UIViewController {
 }
 
 extension DetailViewController: UITextViewDelegate {
-    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        //저장 버튼 생성
+        self.navigationItem.rightBarButtonItems = [saveButton, menuButton, shareButton]
+    }
+    func textViewDidChange(_ textView: UITextView) {
+        shareButton.isEnabled = !textView.text.isEmpty
+        
+    }
 }

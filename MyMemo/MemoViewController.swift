@@ -12,21 +12,42 @@ class MemoViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     @IBOutlet weak var toolBar: UIToolbar!
-    @IBOutlet weak var editButton: UIBarButtonItem!
-    
+    private lazy var editButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editButtonTapped))
+        return button
+    }()
     
     //left button 편집 모드일 때만 활성화
-    let moveButton = UIBarButtonItem(title: "이동", style: .plain, target: self, action: #selector(moveButtonTapped))
-    let moveAllButton = UIBarButtonItem(title: "모두 이동", style: .plain, target: self, action: #selector(moveAllButtonTapped))
+    private lazy var moveButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "이동", style: .plain, target: self, action: #selector(moveButtonTapped))
+        return button
+    }()
+    private lazy var moveAllButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "모두 이동", style: .plain, target: self, action: #selector(moveAllButtonTapped))
+        return button
+    }()
     
     let flexibleSpace = UIBarButtonItem.flexibleSpace()
     
     //right button
-    let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
-    let clearButton = UIBarButtonItem(title: "비우기", style: .plain, target: self, action: #selector(clearButtonTapped))
-    let removeButton = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: #selector(removeButtonTapped))
-    let removeAllButton = UIBarButtonItem(title: "모두 삭제", style: .plain, target: self, action: #selector(removeAllButtonTapped))
-    
+    private lazy var addButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        return button
+    }()
+    private lazy var clearButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "비우기", style: .plain, target: self, action: #selector(clearButtonTapped))
+        return button
+    }()
+    private lazy var removeButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: #selector(removeButtonTapped))
+        button.tintColor = .red
+        return button
+    }()
+    private lazy var removeAllButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "모두 삭제", style: .plain, target: self, action: #selector(removeAllButtonTapped))
+        button.tintColor = .red
+        return button
+    }()
     
     let coreDataManager = CoreDataManager.shared
     
@@ -45,6 +66,13 @@ class MemoViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tableView.reloadData()
+    }
+    
+    func fetchMemos() {
+        guard let myFolder = myFolder else { return }
+        memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
+        
+        setupNavigationBar()
     }
     
     func setupUI() {
@@ -100,24 +128,16 @@ class MemoViewController: UIViewController {
         toolBar.setItems(items, animated: true)
     }
     
-    func fetchMemos() {
-        guard let myFolder = myFolder else { return }
-        memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
-        
-        setupNavigationBar()
-    }
-    
     func setupNavigationBar() {
         if memos.isEmpty {
             self.navigationItem.rightBarButtonItem = nil
         } else {
             self.navigationItem.rightBarButtonItem = editButton
-            print(self.navigationController?.navigationBar.isUserInteractionEnabled)
         }
     }
     
     
-    @IBAction func editButtonTapped(_ sender: UIBarButtonItem) {
+    @objc func editButtonTapped(_ sender: UIBarButtonItem) {
         if tableView.isEditing { //편집 종료
             editButton.title = "편집"
             setEditing(false, animated: true)
@@ -153,7 +173,7 @@ class MemoViewController: UIViewController {
     }
     
     @objc func clearButtonTapped() {
-        let alert = UIAlertController(title: "휴지통에 있는 모든 항목을 영구적으로 지우겠습니까?", message: "이 동작은 실행 취소할 수 없습니다.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "\(memos.count)개의 메모를 영구적으로 지우겠습니까?", message: "이 동작은 실행 취소할 수 없습니다.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "휴지통 비우기", style: .destructive, handler: { [weak self] _ in
             guard let self = self else { return }
@@ -171,19 +191,28 @@ class MemoViewController: UIViewController {
     }
     
     @objc func removeButtonTapped() {
+        guard let myFolder = self.myFolder else { return }
         let selectedCount = tableView.indexPathsForSelectedRows?.count ?? 0
+        let title = myFolder.isTrash ? "영구 삭제" : "삭제"
+        let message = myFolder.isTrash ? "이 동작은 실행 취소할 수 없습니다." : "삭제한 메모는 휴지통으로 이동됩니다."
         
-        let alert = UIAlertController(title: "\(selectedCount)개의 메모 삭제", message: "삭제한 메모는 휴지통으로 이동됩니다.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "\(selectedCount)개의 메모 \(title)", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { [weak self] _ in
+        alert.addAction(UIAlertAction(title: title, style: .destructive, handler: { [weak self] _ in
             guard let self = self else { return }
         
             if let selectedIndexPaths = tableView.indexPathsForSelectedRows {
                 for indexPath in selectedIndexPaths {
                     guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
                     guard let memo = cell.memo else { return }
-                    self.coreDataManager.deleteMemo(memo: memo) {
-
+                    if myFolder.isTrash {
+                        self.coreDataManager.deleteMemoFromTrash(memo: memo) {
+                            
+                        }
+                    } else {
+                        self.coreDataManager.deleteMemo(memo: memo) {
+                            
+                        }
                     }
                 }
             }

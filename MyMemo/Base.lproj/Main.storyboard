@@ -183,15 +183,8 @@
                             <constraint firstItem="FEd-ZL-IaJ" firstAttribute="top" secondItem="vqb-5K-F00" secondAttribute="bottom" id="n5m-7p-bkd"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="pw0-wC-4VP">
-                        <barButtonItem key="rightBarButtonItem" title="편집" id="m9g-zd-Tex">
-                            <connections>
-                                <action selector="editButtonTapped:" destination="1gh-c3-aDY" id="t9Y-Nx-U0e"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="pw0-wC-4VP"/>
                     <connections>
-                        <outlet property="editButton" destination="m9g-zd-Tex" id="v09-zG-nqa"/>
                         <outlet property="tableView" destination="vqb-5K-F00" id="lMn-tp-586"/>
                         <outlet property="toolBar" destination="FEd-ZL-IaJ" id="fUG-A1-dxj"/>
                         <segue destination="8re-0f-8HR" kind="show" identifier="MemoToDetail" id="YZI-3x-Rq7"/>
@@ -281,21 +274,13 @@
                             <constraint firstItem="7n7-lX-xtj" firstAttribute="trailing" secondItem="19x-Oc-1tv" secondAttribute="trailing" constant="10" id="zGn-y1-N3u"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="ZkW-9k-QQG">
-                        <barButtonItem key="rightBarButtonItem" title="저장" id="2Zl-Vu-rhj">
-                            <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <connections>
-                                <action selector="saveButtonTapped:" destination="8re-0f-8HR" id="ono-fY-b6m"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="ZkW-9k-QQG"/>
                     <connections>
                         <outlet property="blueButton" destination="zGD-Jg-TOU" id="oF9-A3-8UQ"/>
                         <outlet property="dateLabel" destination="P5H-Bh-ZUC" id="aGa-Y7-9i1"/>
                         <outlet property="greenButton" destination="RuF-cT-HKV" id="Nz8-CI-ngP"/>
                         <outlet property="pinkButton" destination="Bnx-BO-VM4" id="CtY-TI-fih"/>
                         <outlet property="purpleButton" destination="3f4-SH-J1S" id="XLw-U3-XSE"/>
-                        <outlet property="saveButton" destination="2Zl-Vu-rhj" id="Ka6-nh-Kzr"/>
                         <outlet property="textView" destination="19x-Oc-1tv" id="Qyu-kt-98r"/>
                         <outlet property="yellowButton" destination="J9d-GC-fz7" id="6Wz-H9-Fs9"/>
                         <segue destination="JPH-7w-FdW" kind="presentation" identifier="MoveInDetailView" id="pwr-Qr-TcE"/>
@@ -427,7 +412,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="NSj-54-M8x"/>
+        <segue reference="pwr-Qr-TcE"/>
     </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="labelColor">

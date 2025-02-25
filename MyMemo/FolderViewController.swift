@@ -11,8 +11,14 @@ class FolderViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var toolBar: UIToolbar!
-    let editButton = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editButtonTapped))
-    let addButton = UIBarButtonItem(image: UIImage(systemName: "folder.badge.plus"), style: .plain, target: self, action: #selector(addFolderButtonTapped))
+    private lazy var editButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editButtonTapped))
+        return button
+    }()
+    private lazy var addButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(image: UIImage(systemName: "folder.badge.plus"), style: .plain, target: self, action: #selector(addFolderButtonTapped))
+        return button
+    }()
     let flexibleSpace = UIBarButtonItem.flexibleSpace()
     
     let coreDataManager = CoreDataManager.shared
