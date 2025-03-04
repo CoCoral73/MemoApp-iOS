@@ -20,6 +20,7 @@ public struct Segue {
     static let memoToDetailIdentifier = "MemoToDetail"
     static let moveMemoInMemoViewIdentifier = "MoveInMemoView"
     static let moveMemoInDetailViewIdentifier = "MoveInDetailView"
+    static let lockMemoIdentifier = "LockMemo"
     
     private init() {}
 }

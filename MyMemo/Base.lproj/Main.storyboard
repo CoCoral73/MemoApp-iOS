@@ -284,11 +284,110 @@
                         <outlet property="textView" destination="19x-Oc-1tv" id="Qyu-kt-98r"/>
                         <outlet property="yellowButton" destination="J9d-GC-fz7" id="6Wz-H9-Fs9"/>
                         <segue destination="JPH-7w-FdW" kind="presentation" identifier="MoveInDetailView" id="pwr-Qr-TcE"/>
+                        <segue destination="GSa-0H-KYe" kind="presentation" identifier="LockMemo" id="HTt-17-fKa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vE2-28-8iM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2693.8931297709923" y="-56.338028169014088"/>
+        </scene>
+        <!--Lock View Controller-->
+        <scene sceneID="lt0-qU-0vm">
+            <objects>
+                <viewController id="GSa-0H-KYe" customClass="LockViewController" customModule="MyMemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="RYA-y0-1ST">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gue-Jj-QGf">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="56"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="56" id="cyt-dy-Vkn"/>
+                                </constraints>
+                                <items>
+                                    <navigationItem title="암호 설정" id="FLB-rd-dyF">
+                                        <barButtonItem key="leftBarButtonItem" title="취소" id="ZAQ-eu-i2s">
+                                            <connections>
+                                                <action selector="cancelButtonTapped:" destination="GSa-0H-KYe" id="MkJ-tj-Vs7"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" title="완료" id="SXF-Qw-nmi">
+                                            <connections>
+                                                <action selector="saveButtonTapped:" destination="GSa-0H-KYe" id="mJC-ap-kOh"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="FPJ-a3-ZyC">
+                                <rect key="frame" x="30" y="96" width="333" height="88"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="5bE-Sq-2vb">
+                                        <rect key="frame" x="0.0" y="0.0" width="333" height="34"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="비밀번호" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="j5T-9g-Bhs">
+                                                <rect key="frame" x="0.0" y="0.0" width="92.666666666666671" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="h8t-Uc-aZ9">
+                                                <rect key="frame" x="102.66666666666664" y="0.0" width="230.33333333333337" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="next" secureTextEntry="YES" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="78e-5i-knj">
+                                        <rect key="frame" x="0.0" y="54" width="333" height="34"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="비밀번호 확인" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Sd-Ye-HTw">
+                                                <rect key="frame" x="0.0" y="0.0" width="92.666666666666671" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="2ah-XB-aFK">
+                                                <rect key="frame" x="102.66666666666664" y="0.0" width="230.33333333333337" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" secureTextEntry="YES" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="7Sd-Ye-HTw" firstAttribute="width" secondItem="j5T-9g-Bhs" secondAttribute="width" id="a2T-VE-b1E"/>
+                                </constraints>
+                            </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="비밀번호가 일치하지 않습니다." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ba-9h-hYZ">
+                                <rect key="frame" x="137.66666666666669" y="188" width="133.66666666666669" height="13.333333333333343"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <color key="textColor" systemColor="systemRedColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hAI-PV-kRr"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="FPJ-a3-ZyC" firstAttribute="leading" secondItem="hAI-PV-kRr" secondAttribute="leading" constant="30" id="3zE-9V-839"/>
+                            <constraint firstItem="gue-Jj-QGf" firstAttribute="top" secondItem="hAI-PV-kRr" secondAttribute="top" id="JOD-p3-tVB"/>
+                            <constraint firstItem="hAI-PV-kRr" firstAttribute="trailing" secondItem="FPJ-a3-ZyC" secondAttribute="trailing" constant="30" id="T52-t2-zZZ"/>
+                            <constraint firstItem="7ba-9h-hYZ" firstAttribute="leading" secondItem="2ah-XB-aFK" secondAttribute="leading" constant="5" id="iBf-Ei-Ewz"/>
+                            <constraint firstItem="gue-Jj-QGf" firstAttribute="leading" secondItem="hAI-PV-kRr" secondAttribute="leading" id="lsf-uH-fdX"/>
+                            <constraint firstItem="7ba-9h-hYZ" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="4" id="tcV-nY-MOo"/>
+                            <constraint firstItem="FPJ-a3-ZyC" firstAttribute="top" secondItem="gue-Jj-QGf" secondAttribute="bottom" constant="40" id="vFE-2B-Ujg"/>
+                            <constraint firstItem="gue-Jj-QGf" firstAttribute="trailing" secondItem="hAI-PV-kRr" secondAttribute="trailing" id="zat-8U-tUe"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="pwLabel" destination="7ba-9h-hYZ" id="5Vf-kw-k96"/>
+                        <outlet property="pwTf1" destination="h8t-Uc-aZ9" id="DQG-1D-hJl"/>
+                        <outlet property="pwTf2" destination="2ah-XB-aFK" id="v2x-7g-f87"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="KwB-1v-89n" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3630" y="-56"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="hZ9-YC-rUu">
@@ -372,6 +471,9 @@
                             </tableView>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="N9p-pt-fIx">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="56"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="56" id="81I-bg-mPT"/>
+                                </constraints>
                                 <items>
                                     <navigationItem title="폴더 선택" id="kMQ-aL-gZv">
                                         <barButtonItem key="leftBarButtonItem" title="취소" id="FBL-dq-TnR">
@@ -408,7 +510,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zUT-Py-CBy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2197.709923664122" y="683.80281690140851"/>
+            <point key="canvasLocation" x="2215" y="808"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
@@ -423,6 +525,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

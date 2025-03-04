@@ -30,7 +30,12 @@ class MemoCell: UITableViewCell {
     }
     
     func configureUIwithData() {
-        memoTextLabel.text = memo?.text
+        if let memo = self.memo, let _ = memo.password {
+            memoTextLabel.text = memo.text?.components(separatedBy: ["\n"]).first
+        } else {
+            memoTextLabel.text = memo?.text
+        }
+        
         guard let colorNum = memo?.color else { return }
         let color = MemoColor(rawValue: colorNum) ?? .pink
         backView.backgroundColor = color.backgroundColor

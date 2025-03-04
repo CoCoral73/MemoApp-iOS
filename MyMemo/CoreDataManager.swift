@@ -243,9 +243,39 @@ final class CoreDataManager {
             
             do {
                 let fetchedList = try context.fetch(request)
-                if var targetMemo = fetchedList.first {
+                if let targetMemo = fetchedList.first {
                     targetMemo.folder = trashFolder
                     targetMemo.deletedDate = Date()
+                    
+                    if context.hasChanges {
+                        do {
+                            try context.save()
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+            completionHandler()
+        }
+    }
+    
+    func deleteEmptyMemo(memo: Memo, completionHandler: @escaping () -> Void) {
+        guard let date = memo.date else {
+            completionHandler()
+            return
+        }
+
+        if let context = context {
+            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
+            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
+            
+            do {
+                let fetchedList = try context.fetch(request)
+                if let targetMemo = fetchedList.first {
+                    context.delete(targetMemo)
                     
                     if context.hasChanges {
                         do {
@@ -310,7 +340,7 @@ final class CoreDataManager {
             
             do {
                 let fetchedList = try context.fetch(request)
-                if var targetMemo = fetchedList.first {
+                if let targetMemo = fetchedList.first {
                     context.delete(targetMemo)
                     
                     if context.hasChanges {

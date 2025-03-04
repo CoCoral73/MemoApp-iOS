@@ -88,6 +88,7 @@ class FolderViewController: UIViewController {
                 }
             }
         }
+        //처음엔 빈 문자열이니까 사용 불가
         success.isEnabled = false
         
         let cancel = UIAlertAction(title: "취소", style: .cancel)
@@ -108,18 +109,12 @@ class FolderViewController: UIViewController {
         // 입력값이 비어있거나, 이미 존재한다면 확인 버튼을 비활성화하고, 인라인 피드백(예: 텍스트필드 배경색 변경)을 제공할 수 있음.
         if folderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             addAction.isEnabled = false
-            textField.layer.borderColor = UIColor.red.cgColor
-            textField.layer.borderWidth = 1.0
             alert.message = "유효하지 않은 폴더명"
         } else if folderAlreadyExists {
             addAction.isEnabled = false
-            textField.layer.borderColor = UIColor.red.cgColor
-            textField.layer.borderWidth = 1.0
             alert.message = "중복된 폴더명"
         } else {
             addAction.isEnabled = true
-            textField.layer.borderColor = UIColor.clear.cgColor
-            textField.layer.borderWidth = 0.0
             alert.message = ""
         }
     }

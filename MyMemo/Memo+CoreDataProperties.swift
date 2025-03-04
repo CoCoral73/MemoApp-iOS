@@ -20,7 +20,7 @@ extension Memo {
     @NSManaged public var date: Date?
     @NSManaged public var deletedDate: Date?
     @NSManaged public var color: Int64
-    @NSManaged public var password: Int64
+    @NSManaged public var password: String?
     @NSManaged public var folder: Folder
 
     var dateString: String? {

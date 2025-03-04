@@ -136,8 +136,9 @@ class MemoViewController: UIViewController {
         }
     }
     
-    
     @objc func editButtonTapped(_ sender: UIBarButtonItem) {
+        setEditing(!tableView.isEditing, animated: true)
+        /*
         if tableView.isEditing { //편집 종료
             editButton.title = "편집"
             setEditing(false, animated: true)
@@ -145,9 +146,8 @@ class MemoViewController: UIViewController {
             editButton.title = "완료"
             setEditing(true, animated: true)
         }
-        setupToolbarItems()
+         */
     }
-
     
     @objc func moveButtonTapped() {
         //선택 이동
@@ -219,6 +219,11 @@ class MemoViewController: UIViewController {
             
             self.fetchMemos()
             self.tableView.reloadData()
+            if self.memos.isEmpty {
+                self.setEditing(false, animated: true)
+            } else {
+                self.setupToolbarItems()
+            }
         }))
         
         // 현재 뷰 컨트롤러에서 alert 표시
@@ -236,6 +241,7 @@ class MemoViewController: UIViewController {
             self.coreDataManager.deleteAllMemoFromFolder(folder: myFolder) {
                 self.fetchMemos()
                 self.tableView.reloadData()
+                self.setEditing(false, animated: true)
             }
         }))
         
@@ -259,6 +265,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
         
         let memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
         cell.memo = memos[indexPath.row]
+        cell.selectionStyle = .none
         
         return cell
     }
@@ -269,7 +276,39 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             setupToolbarItems()
             return
         }
-        performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
+        
+        let memo = memos[indexPath.row]
+        if let pw = memo.password {
+            let alert = createAskingPWAlert(isFirst: true, password: pw, indexPath: indexPath)
+            present(alert, animated: true, completion: nil)
+        } else {
+            performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
+        }
+    }
+    
+    func createAskingPWAlert(isFirst: Bool, password: String?, indexPath: IndexPath) -> UIAlertController {
+        let msg1 = "해당 메모의 암호를 입력하세요.", msg2 = "잘못된 암호입니다. 다시 입력하세요."
+        let alert = UIAlertController(title: "잠겨진 메모", message: isFirst ? msg1 : msg2, preferredStyle: .alert)
+        
+        alert.addTextField { textField in
+            textField.placeholder = "암호"
+            textField.isSecureTextEntry = true
+        }
+
+        let success = UIAlertAction(title: "확인", style: .default) { action in
+            let inputPW = alert.textFields?[0].text
+            if inputPW == password {
+                self.performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
+            } else {
+                let wrongAlert = self.createAskingPWAlert(isFirst: false, password: password, indexPath: indexPath)
+                self.present(wrongAlert, animated: true, completion: nil)
+            }
+        }
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+
+        alert.addAction(success)
+        alert.addAction(cancel)
+        return alert
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -283,14 +322,18 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             
             guard let myFolder = myFolder else { return }
             detailVC.folder = myFolder
-            detailVC.memoFetch = { (sender) in
+            detailVC.completionOfAdd = { (sender) in
                 self.fetchMemos()
                 return self.memos.first
+            }
+            detailVC.completionOfMoveAndRemove = { (sender) in
+                self.fetchMemos()
+                self.setupToolbarItems()
             }
             
             //셀 선택 시에만 아래 코드 실행
             guard let indexPath = sender as? IndexPath else { return }
-            let memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
+            //let memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
             detailVC.memo = memos[indexPath.row]
             
             return
@@ -304,6 +347,12 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             moveVC.completionMove = { (sender) in
                 self.fetchMemos()
                 self.tableView.reloadData()
+                
+                if self.memos.isEmpty {
+                    self.setEditing(false, animated: true)
+                } else {
+                    self.setupToolbarItems()
+                }
             }
         }
     }
@@ -340,7 +389,9 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
+        editButton.title = editing ? "완료" : "편집"
         tableView.setEditing(editing, animated: animated)
+        setupToolbarItems()
     }
     
 }
