@@ -23,6 +23,8 @@ final class CoreDataManager {
     let memoModelName: String = "Memo"
     
     //MARK: 폴더 관리
+    
+    //앱 최초 실행 시 기본 폴더 세팅
     func seedInitialDataIfNeeded() {
         if let context = context {
             let request: NSFetchRequest<Folder> = Folder.fetchRequest()
@@ -51,6 +53,7 @@ final class CoreDataManager {
         }
     }
     
+    //폴더 fetch
     func getFolderListFromCoreData() -> [Folder] {
         var folderList: [Folder] = []
         if let context = context {
@@ -67,6 +70,7 @@ final class CoreDataManager {
         return folderList
     }
     
+    //휴지통 캐싱
     func getOrCreateTrashFolder() -> Folder? {
         if let trashFolder = trashFolder {
             return trashFolder
@@ -78,9 +82,9 @@ final class CoreDataManager {
             
             do {
                 let results = try context.fetch(request)
-                if let folder = results.first {
-                    trashFolder = folder
-                    return folder
+                if let trash = results.first {
+                    trashFolder = trash
+                    return trash
                 }
             } catch {
                 print("휴지통 폴더 fetch 에러: \(error)")
@@ -89,6 +93,7 @@ final class CoreDataManager {
         return nil
     }
     
+    //폴더 추가
     func addFolder(name: String?, completionHandler: @escaping () -> Void) {
         if let context = context {
             if let entity = NSEntityDescription.entity(forEntityName: self.folderModelName, in: context) {
@@ -101,21 +106,23 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error)
+                            print("폴더 추가 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             }
+            
+            completionHandler()
         }
-        
-        completionHandler()
     }
     
+    //폴더명 수정
     func updateFolderName(newName: String?, completionHandler: @escaping () -> Void) {
-        //폴더명 수정
+        
         
     }
     
+    //폴더 삭제
     func deleteFolder(folder: Folder, completionHandler: @escaping () -> Void) {
         guard let date = folder.date else {
             completionHandler()
@@ -130,6 +137,7 @@ final class CoreDataManager {
             do {
                 let fetchedList = try context.fetch(request)
                 if let targetFolder = fetchedList.first {
+                    //폴더 안의 메모는 휴지통으로 이동
                     if let memosSet = targetFolder.memos as? Set<Memo> {
                         memosSet.sorted { return ($0.date ?? Date.distantFuture) < ($1.date ?? Date.distantFuture) }.forEach { memo in
                             memo.folder = trashFolder
@@ -143,18 +151,20 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("deleteFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
-                print(error.localizedDescription)
+                print("폴더 삭제 에러: \(error.localizedDescription)")
             }
             completionHandler()
         }
     }
     
     //MARK: 메모 관리
+    
+    //특정 폴더 내의 메모 fetch
     func getMemoListFromCoreData(selectedFolder: Folder) -> [Memo] {
         var memoList: [Memo] = []
         
@@ -177,6 +187,7 @@ final class CoreDataManager {
         return memoList
     }
     
+    //메모 추가
     func addMemo(text: String?, color: Int64, folder: Folder, date: Date?, completionHandler: @escaping () -> Void) {
         if let context = context {
             if let entity = NSEntityDescription.entity(forEntityName: self.memoModelName, in: context) {
@@ -190,16 +201,17 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("addMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             }
+            
+            completionHandler()
         }
-        
-        completionHandler()
     }
     
+    //메모 수정
     func updateMemo(memo: Memo, completionHandler: @escaping () -> Void) {
         guard let date = memo.date else {
             completionHandler()
@@ -219,18 +231,20 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("updateMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
-                print(error.localizedDescription)
+                print("메모 수정 에러: \(error.localizedDescription)")
             }
+            
             completionHandler()
         }
     }
     
-    func deleteMemo(memo: Memo, completionHandler: @escaping () -> Void) {
+    //메모 삭제(휴지통으로 이동)
+    func removeMemo(memo: Memo, completionHandler: @escaping () -> Void) {
         guard let date = memo.date else {
             completionHandler()
             return
@@ -251,7 +265,7 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("removeMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -262,6 +276,7 @@ final class CoreDataManager {
         }
     }
     
+    //텍스트가 비어있는 메모 삭제(완전 삭제)
     func deleteEmptyMemo(memo: Memo, completionHandler: @escaping () -> Void) {
         guard let date = memo.date else {
             completionHandler()
@@ -281,18 +296,20 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("deleteEmptyMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
-                print(error.localizedDescription)
+                print("빈 메모 삭제 에러: \(error.localizedDescription)")
             }
+            
             completionHandler()
         }
     }
     
-    func deleteAllMemoFromFolder(folder: Folder, completionHandler: @escaping () -> Void) {
+    //폴더 내부의 메모 전체 삭제 (휴지통으로 이동)
+    func removeAllMemoFromFolder(folder: Folder, completionHandler: @escaping () -> Void) {
         guard let date = folder.date else {
             completionHandler()
             return
@@ -317,17 +334,19 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("removeAllMemoFromFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
-                print(error.localizedDescription)
+                print("메모 전체 삭제 에러: \(error.localizedDescription)")
             }
+            
             completionHandler()
         }
     }
     
+    //휴지통에 있는 메모 삭제 (완전 삭제)
     func deleteMemoFromTrash(memo: Memo, completionHandler: @escaping () -> Void) {
         guard let date = memo.date else {
             completionHandler()
@@ -347,17 +366,19 @@ final class CoreDataManager {
                         do {
                             try context.save()
                         } catch {
-                            print(error.localizedDescription)
+                            print("deleteMemoFromTrash 컨텍스트 저장 에러: \(error.localizedDescription)")
                         }
                     }
                 }
             } catch {
-                print(error.localizedDescription)
+                print("휴지통 메모 삭제 에러: \(error.localizedDescription)")
             }
+            
             completionHandler()
         }
     }
     
+    //휴지통 비우기
     func deleteAllMemoFromTrash(completionHandler: @escaping () -> Void) {
         guard let trashFolder = getOrCreateTrashFolder() else {
             completionHandler()
@@ -366,23 +387,46 @@ final class CoreDataManager {
         
         if let context = context {
             if let memosSet = trashFolder.memos as? Set<Memo> {
-                do {
-                    for memo in memosSet {
-                        context.delete(memo)
+                for memo in memosSet {
+                    context.delete(memo)
+                }
+                
+                if context.hasChanges {
+                    do {
+                        try context.save()
+                    } catch {
+                        print("deleteAllMemoFromTrash 컨텍스트 저장 에러")
                     }
-                    try context.save()
-                } catch {
-                    print("휴지통 비우기 에러: \(error.localizedDescription)")
                 }
             }
         }
+        
         completionHandler()
     }
     
+    //유효기간 만료된 메모 삭제 (완전 삭제)
     func deleteOldMemoFromTrash() {
+        guard let trashFolder = getOrCreateTrashFolder() else { return }
         guard let before30days = Calendar.current.date(byAdding: .day, value: -30, to: Date()) else { return }
         
         if let context = context {
+            if let memoSet = trashFolder.memos as? Set<Memo> {
+                let expiredMemos = memoSet.filter { $0.deletedDate! <= before30days }
+                for memo in expiredMemos {
+                    context.delete(memo)
+                }
+                
+                if context.hasChanges {
+                    do {
+                        try context.save()
+                    } catch {
+                        print("deleteOldMemoFromTrash 컨텍스트 저장 에러: \(error.localizedDescription)")
+                    }
+                }
+                print("만료된 메모 \(expiredMemos.count)개 삭제 완료")
+            }
+            
+            /*
             let request: NSFetchRequest<Memo> = Memo.fetchRequest()
             // 휴지통에 있고, deletedDate가 thresholdDate보다 이전인 메모를 찾음
             request.predicate = NSPredicate(format: "folder.isTrash == true AND deletedDate <= %@", before30days as NSDate)
@@ -397,6 +441,7 @@ final class CoreDataManager {
             } catch {
                 print("휴지통 메모 삭제 에러: \(error.localizedDescription)")
             }
+            */
         }
     }
 }

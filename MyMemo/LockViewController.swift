@@ -13,8 +13,8 @@ class LockViewController: UIViewController {
     
     @IBOutlet weak var pwTf1: UITextField!
     @IBOutlet weak var pwTf2: UITextField!
-    
     @IBOutlet weak var pwLabel: UILabel!
+    @IBOutlet weak var hintTf: UITextField!
     
     var memo: Memo?
     var completionLock: (LockViewController) -> Void = { (sender) in }
@@ -30,6 +30,7 @@ class LockViewController: UIViewController {
     func setupTextField() {
         pwTf1.delegate = self
         pwTf2.delegate = self
+        hintTf.delegate = self
     }
 
     @IBAction func cancelButtonTapped(_ sender: UIBarButtonItem) {
@@ -41,6 +42,7 @@ class LockViewController: UIViewController {
         
         if pwTf1.text == pwTf2.text {
             memo.password = pwTf2.text
+            memo.hint = hintTf.text
             coreDataManager.updateMemo(memo: memo) {
                 
             }
@@ -63,8 +65,10 @@ extension LockViewController: UITextFieldDelegate {
         if textField == pwTf1 {
             pwTf2.becomeFirstResponder()
         } else if textField == pwTf2 {
-            pwTf2.resignFirstResponder()
+            hintTf.becomeFirstResponder()
             pwLabel.isHidden = pwTf1.text == pwTf2.text
+        } else if textField == hintTf {
+            hintTf.resignFirstResponder()
         }
         return true
     }

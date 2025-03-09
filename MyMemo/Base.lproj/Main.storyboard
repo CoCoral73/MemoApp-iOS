@@ -365,21 +365,42 @@
                                 <color key="textColor" systemColor="systemRedColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Xn7-TI-1UY">
+                                <rect key="frame" x="30" y="204" width="333" height="34"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HINT" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fPt-BS-SSH">
+                                        <rect key="frame" x="0.0" y="0.0" width="92.666666666666671" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="KsH-Sq-sn2">
+                                        <rect key="frame" x="102.66666666666664" y="0.0" width="230.33333333333337" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
+                                    </textField>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="hAI-PV-kRr"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="FPJ-a3-ZyC" firstAttribute="leading" secondItem="hAI-PV-kRr" secondAttribute="leading" constant="30" id="3zE-9V-839"/>
+                            <constraint firstItem="Xn7-TI-1UY" firstAttribute="leading" secondItem="hAI-PV-kRr" secondAttribute="leading" constant="30" id="DSW-aw-zda"/>
                             <constraint firstItem="gue-Jj-QGf" firstAttribute="top" secondItem="hAI-PV-kRr" secondAttribute="top" id="JOD-p3-tVB"/>
                             <constraint firstItem="hAI-PV-kRr" firstAttribute="trailing" secondItem="FPJ-a3-ZyC" secondAttribute="trailing" constant="30" id="T52-t2-zZZ"/>
                             <constraint firstItem="7ba-9h-hYZ" firstAttribute="leading" secondItem="2ah-XB-aFK" secondAttribute="leading" constant="5" id="iBf-Ei-Ewz"/>
                             <constraint firstItem="gue-Jj-QGf" firstAttribute="leading" secondItem="hAI-PV-kRr" secondAttribute="leading" id="lsf-uH-fdX"/>
+                            <constraint firstItem="hAI-PV-kRr" firstAttribute="trailing" secondItem="Xn7-TI-1UY" secondAttribute="trailing" constant="30" id="mkj-W8-X80"/>
+                            <constraint firstItem="fPt-BS-SSH" firstAttribute="width" secondItem="7Sd-Ye-HTw" secondAttribute="width" id="pZi-jN-dUL"/>
+                            <constraint firstItem="Xn7-TI-1UY" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="20" id="sH3-j3-6nN"/>
                             <constraint firstItem="7ba-9h-hYZ" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="4" id="tcV-nY-MOo"/>
                             <constraint firstItem="FPJ-a3-ZyC" firstAttribute="top" secondItem="gue-Jj-QGf" secondAttribute="bottom" constant="40" id="vFE-2B-Ujg"/>
                             <constraint firstItem="gue-Jj-QGf" firstAttribute="trailing" secondItem="hAI-PV-kRr" secondAttribute="trailing" id="zat-8U-tUe"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="hintTf" destination="KsH-Sq-sn2" id="GKi-JQ-sxJ"/>
                         <outlet property="pwLabel" destination="7ba-9h-hYZ" id="5Vf-kw-k96"/>
                         <outlet property="pwTf1" destination="h8t-Uc-aZ9" id="DQG-1D-hJl"/>
                         <outlet property="pwTf2" destination="2ah-XB-aFK" id="v2x-7g-f87"/>
@@ -514,7 +535,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="pwr-Qr-TcE"/>
+        <segue reference="NSj-54-M8x"/>
     </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="labelColor">

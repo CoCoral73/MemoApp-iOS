@@ -64,8 +64,12 @@ class DetailViewController: UIViewController {
     //버그 나지 않는 이상 무조건 값이 있음
     var folder: Folder?
     
+    //메모뷰의 + -> 디테일뷰인 상태일 때 사용
     var completionOfAdd: (DetailViewController) -> Memo? = { (sender) in return nil }
+    //디테일뷰 내에서 메모의 이동과 삭제가 이루어졌을 때(폴더 이동) 사용
     var completionOfMoveAndRemove: (DetailViewController) -> Void = { (sender) in }
+    //디테일뷰 내에서 메모를 잠금처리 했을 때 사용
+    var completionOfLock: (DetailViewController) -> Void = { (sender) in }
     
     var tmpColor: Int64? = 1
     var nowDate: Date?  //새로운 모드가 생성될 때 값이 할당됨
@@ -173,7 +177,15 @@ class DetailViewController: UIViewController {
     }
     
     @objc func shareButtonTapped() {
+        let textToShare = textView.text
+        let activityViewController = UIActivityViewController(activityItems: [textToShare], applicationActivities: nil)
         
+        // iPad의 경우 popoverPresentationController 설정 필요
+        if let popover = activityViewController.popoverPresentationController {
+            popover.barButtonItem = self.navigationItem.rightBarButtonItem
+        }
+        
+        present(activityViewController, animated: true, completion: nil)
     }
     
     @objc func saveButtonTapped() {
@@ -247,8 +259,8 @@ class DetailViewController: UIViewController {
             guard let self = self else { return }
             // 예시: 데이터 배열 및 Core Data 삭제 처리
             
-            let memoToDelete = memo
-            self.coreDataManager.deleteMemo(memo: memoToDelete) {
+            let memoToRemove = memo
+            self.coreDataManager.removeMemo(memo: memoToRemove) {
                 self.completionOfMoveAndRemove(self)
             }
             self.navigationController?.popViewController(animated: true)
@@ -277,6 +289,7 @@ class DetailViewController: UIViewController {
             lockVC.memo = memo
             lockVC.completionLock = { (sender) in
                 self.menuButton.menu = self.menuOfLockState
+                self.completionOfLock(self)
             }
         }
     }
@@ -293,6 +306,5 @@ extension DetailViewController: UITextViewDelegate {
     }
     func textViewDidChange(_ textView: UITextView) {
         shareButton.isEnabled = !textView.text.isEmpty
-        
     }
 }
