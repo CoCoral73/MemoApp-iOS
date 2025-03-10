@@ -65,6 +65,7 @@ class FolderViewController: UIViewController {
             appearance.shadowColor = .clear
         
             navigationBar.standardAppearance = appearance
+            navigationBar.compactAppearance = appearance
             navigationBar.scrollEdgeAppearance = appearance
         }
     }
@@ -75,9 +76,6 @@ class FolderViewController: UIViewController {
         
         tableView.backgroundColor = MemoColor.base.backgroundColor
         tableView.rowHeight = 45
-        
-        let topOffset = CGPoint(x: 0, y: -tableView.adjustedContentInset.top)
-        tableView.setContentOffset(topOffset, animated: false)  
     }
     
     func fetchFolders() {
