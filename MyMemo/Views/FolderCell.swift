@@ -49,13 +49,13 @@ class FolderCell: UITableViewCell {
                 self.iconImageView.tintColor = UIColor.gray
                 self.titleLabel.textColor = UIColor.gray
             } else {
-                self.iconImageView.tintColor = .systemBlue
+                self.iconImageView.tintColor = .systemOrange
                 self.titleLabel.textColor = .label
             }
             self.subtitleLabel?.isHidden = editing
             self.accessoryType = .none
         } else {
-            self.iconImageView.tintColor = .systemBlue // 또는 원래 색상
+            self.iconImageView.tintColor = .systemOrange // 또는 원래 색상
             self.titleLabel.textColor = UIColor.label
             self.subtitleLabel.isHidden = editing
             self.accessoryType = .disclosureIndicator

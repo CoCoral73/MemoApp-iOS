@@ -68,8 +68,8 @@ class DetailViewController: UIViewController {
     var completionOfAdd: (DetailViewController) -> Memo? = { (sender) in return nil }
     //디테일뷰 내에서 메모의 이동과 삭제가 이루어졌을 때(폴더 이동) 사용
     var completionOfMoveAndRemove: (DetailViewController) -> Void = { (sender) in }
-    //디테일뷰 내에서 메모를 잠금처리 했을 때 사용
-    var completionOfLock: (DetailViewController) -> Void = { (sender) in }
+    //디테일뷰 내에서 메모를 상태변경(색 변경, 잠금) 했을 때 사용
+    var completionOfChangeState: (DetailViewController) -> Void = { (sender) in }
     
     var tmpColor: Int64? = 1
     var nowDate: Date?  //새로운 모드가 생성될 때 값이 할당됨
@@ -174,6 +174,7 @@ class DetailViewController: UIViewController {
             memo.color = self.tmpColor ?? 1
             coreDataManager.updateMemo(memo: memo) { }
         }
+        completionOfChangeState(self)
     }
     
     @objc func shareButtonTapped() {
@@ -200,6 +201,7 @@ class DetailViewController: UIViewController {
                     memo.text = textView.text
                     memo.color = tmpColor ?? 1
                     coreDataManager.updateMemo(memo: memo) { }
+                    self.completionOfChangeState(self)
                 }
             } else {    //생성 모드
                 if textView.text.isEmpty { // 텍스트뷰가 비어있음 -> 저장 안함
@@ -239,6 +241,7 @@ class DetailViewController: UIViewController {
                 
             }
             self.menuButton.menu = self.menuOfUnlockState
+            self.completionOfChangeState(self)
         }
         let cancel = UIAlertAction(title: "취소", style: .cancel)
         
@@ -289,7 +292,7 @@ class DetailViewController: UIViewController {
             lockVC.memo = memo
             lockVC.completionLock = { (sender) in
                 self.menuButton.menu = self.menuOfLockState
-                self.completionOfLock(self)
+                self.completionOfChangeState(self)
             }
         }
     }

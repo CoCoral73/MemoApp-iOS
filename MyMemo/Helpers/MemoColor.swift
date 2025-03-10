@@ -13,6 +13,7 @@ enum MemoColor: Int64 {
     case green = 3
     case blue = 4
     case purple = 5
+    case base = 6
     
     var backgroundColor: UIColor {
         switch self {
@@ -26,9 +27,12 @@ enum MemoColor: Int64 {
             return UIColor(red: 0.65, green: 0.78, blue: 0.91, alpha: 1.00)
         case .purple:
             return UIColor(red: 0.90, green: 0.90, blue: 0.98, alpha: 1.00)
+        case .base:
+            return UIColor(red: 1.00, green: 1.00, blue: 0.94, alpha: 1.00)
         }
     }
     
+    /*
     var navigationBarColor: UIColor {
         switch self {
         case .pink:
@@ -43,4 +47,5 @@ enum MemoColor: Int64 {
             return UIColor(red: 0.85, green: 0.83, blue: 0.94, alpha: 1.00)
         }
     }
+     */
 }

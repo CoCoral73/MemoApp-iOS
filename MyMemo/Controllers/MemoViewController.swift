@@ -8,7 +8,7 @@
 import UIKit
 
 class MemoViewController: UIViewController {
-    
+
     @IBOutlet weak var tableView: UITableView!
     
     @IBOutlet weak var toolBar: UIToolbar!
@@ -73,7 +73,7 @@ class MemoViewController: UIViewController {
         tableView.dataSource = self
         tableView.allowsMultipleSelectionDuringEditing = true
         
-        tableView.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        tableView.backgroundColor = MemoColor.base.backgroundColor
     }
     
     func fetchMemos() {
@@ -97,6 +97,7 @@ class MemoViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false   //검색 시 배경을 흐리게 처리하지 않도록
         searchController.searchBar.placeholder = "검색"
         searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.setValue("취소", forKey: "cancelButtonText")
         navigationItem.searchController = searchController
         definesPresentationContext = true   //현재 뷰 컨트롤러 내에서 검색 결과가 표시되도록 하는 설정
     }
@@ -105,8 +106,8 @@ class MemoViewController: UIViewController {
         guard let myFolder = myFolder else { return }
         self.title = myFolder.name
         
-        view.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
-        toolBar.barTintColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        view.backgroundColor = MemoColor.base.backgroundColor
+        toolBar.barTintColor = MemoColor.base.backgroundColor
         clearButton.tintColor = .red
         
         setupToolbarItems()
@@ -312,7 +313,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         cell.memo = memo
-        cell.selectionStyle = .none
+        cell.selectionStyle = .gray
         
         return cell
     }
@@ -329,6 +330,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             let alert = createAskingPWAlert(count: 0, password: pw, hint: hint, indexPath: indexPath)
             present(alert, animated: true, completion: nil)
         } else {
+            tableView.deselectRow(at: indexPath, animated: true)
             performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
         }
     }
@@ -386,7 +388,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
                 self.fetchMemos()
                 self.setupToolbarItems()
             }
-            detailVC.completionOfLock = { (sender) in
+            detailVC.completionOfChangeState = { (sender) in
                 self.tableView.reloadData()
             }
             

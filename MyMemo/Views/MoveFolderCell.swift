@@ -45,7 +45,7 @@ class MoveFolderCell: UITableViewCell {
             iconImageView.tintColor = .gray
             titleLabel.textColor = .gray
         } else {
-            iconImageView.tintColor = .systemBlue
+            iconImageView.tintColor = .systemOrange
             titleLabel.textColor = .label
         }
     }

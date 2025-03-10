@@ -28,16 +28,20 @@ class MoveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setupUI()
         setupNavigationBar()
         setupTableview()
         fetchFolders()
+    }
+    
+    func setupUI() {
+        view.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
     }
     
     func setupNavigationBar() {
         self.title = "폴더 선택"
         
         moveButton.isEnabled = false
-        
     }
     
     func setupTableview() {

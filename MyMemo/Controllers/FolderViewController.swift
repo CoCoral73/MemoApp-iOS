@@ -13,10 +13,12 @@ class FolderViewController: UIViewController {
     @IBOutlet weak var toolBar: UIToolbar!
     private lazy var editButton: UIBarButtonItem = {
         let button = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editButtonTapped))
+        button.tintColor = .systemOrange
         return button
     }()
     private lazy var addButton: UIBarButtonItem = {
         let button = UIBarButtonItem(image: UIImage(systemName: "folder.badge.plus"), style: .plain, target: self, action: #selector(addFolderButtonTapped))
+        button.tintColor = .systemOrange
         return button
     }()
     let flexibleSpace = UIBarButtonItem.flexibleSpace()
@@ -29,7 +31,7 @@ class FolderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupBar()
+        setupUI()
         setupTableview()
         fetchFolders()
     }
@@ -39,19 +41,43 @@ class FolderViewController: UIViewController {
         tableView.reloadData()
     }
 
+    func setupUI() {
+        view.backgroundColor = MemoColor.base.backgroundColor
+        
+        setupBar()
+    }
+    
     func setupBar() {
         self.title = "폴더"
         
-        toolBar.barTintColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        toolBar.barTintColor = MemoColor.base.backgroundColor
         toolBar.setItems([editButton, flexibleSpace, addButton], animated: true)
+        
+        if let navigationBar = navigationController?.navigationBar {
+            let appearance = UINavigationBarAppearance()
+            // 기본 배경 및 기타 스타일 초기화
+            appearance.configureWithOpaqueBackground()
+            // 배경 색상 설정
+            appearance.backgroundColor = MemoColor.base.backgroundColor
+            // 타이틀 텍스트 색상 설정
+            appearance.titleTextAttributes = [.foregroundColor: UIColor.black]
+            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+            appearance.shadowColor = .clear
+        
+            navigationBar.standardAppearance = appearance
+            navigationBar.scrollEdgeAppearance = appearance
+        }
     }
     
     func setupTableview() {
         tableView.delegate = self
         tableView.dataSource = self
         
-        tableView.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
+        tableView.backgroundColor = MemoColor.base.backgroundColor
         tableView.rowHeight = 45
+        
+        let topOffset = CGPoint(x: 0, y: -tableView.adjustedContentInset.top)
+        tableView.setContentOffset(topOffset, animated: false)  
     }
     
     func fetchFolders() {
