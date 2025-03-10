@@ -330,7 +330,6 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             let alert = createAskingPWAlert(count: 0, password: pw, hint: hint, indexPath: indexPath)
             present(alert, animated: true, completion: nil)
         } else {
-            tableView.deselectRow(at: indexPath, animated: true)
             performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
         }
     }
@@ -395,7 +394,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
             //셀 선택 시에만 아래 코드 실행
             guard let indexPath = sender as? IndexPath else { return }
             detailVC.memo = memos[indexPath.row]
-            
+            tableView.deselectRow(at: indexPath, animated: true)
             return
         }
         

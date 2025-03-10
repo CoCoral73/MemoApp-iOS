@@ -365,7 +365,7 @@
                                 </constraints>
                             </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="비밀번호가 일치하지 않습니다." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ba-9h-hYZ">
-                                <rect key="frame" x="137.66666666666669" y="188" width="133.66666666666669" height="13.333333333333343"/>
+                                <rect key="frame" x="137.66666666666669" y="187" width="133.66666666666669" height="13.333333333333343"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                 <color key="textColor" systemColor="systemRedColor"/>
                                 <nil key="highlightedColor"/>
@@ -399,7 +399,7 @@
                             <constraint firstItem="hAI-PV-kRr" firstAttribute="trailing" secondItem="Xn7-TI-1UY" secondAttribute="trailing" constant="30" id="mkj-W8-X80"/>
                             <constraint firstItem="fPt-BS-SSH" firstAttribute="width" secondItem="7Sd-Ye-HTw" secondAttribute="width" id="pZi-jN-dUL"/>
                             <constraint firstItem="Xn7-TI-1UY" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="20" id="sH3-j3-6nN"/>
-                            <constraint firstItem="7ba-9h-hYZ" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="4" id="tcV-nY-MOo"/>
+                            <constraint firstItem="7ba-9h-hYZ" firstAttribute="top" secondItem="FPJ-a3-ZyC" secondAttribute="bottom" constant="3" id="tcV-nY-MOo"/>
                             <constraint firstItem="FPJ-a3-ZyC" firstAttribute="top" secondItem="gue-Jj-QGf" secondAttribute="bottom" constant="40" id="vFE-2B-Ujg"/>
                             <constraint firstItem="gue-Jj-QGf" firstAttribute="trailing" secondItem="RYA-y0-1ST" secondAttribute="trailing" id="zat-8U-tUe"/>
                         </constraints>
