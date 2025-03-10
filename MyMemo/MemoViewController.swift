@@ -49,9 +49,13 @@ class MemoViewController: UIViewController {
         return button
     }()
     
+    var searchController = UISearchController(searchResultsController: nil)
+    
     let coreDataManager = CoreDataManager.shared
     
     var memos: [Memo] = []
+    var filteredMemos: [Memo] = []
+    
     var myFolder: Folder?
 
     override func viewDidLoad() {
@@ -60,7 +64,16 @@ class MemoViewController: UIViewController {
         // Do any additional setup after loading the view.
         setupTableview()
         fetchMemos()
+        setupSearchController()
         setupUI()
+    }
+    
+    func setupTableview() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.allowsMultipleSelectionDuringEditing = true
+        
+        tableView.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
     }
     
     func fetchMemos() {
@@ -68,7 +81,24 @@ class MemoViewController: UIViewController {
         memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
         
         tableView.reloadData()
-        setupNavigationBar()
+        setupRightBarButton()
+    }
+    
+    func setupRightBarButton() {
+        if memos.isEmpty {
+            self.navigationItem.rightBarButtonItem = nil
+        } else {
+            self.navigationItem.rightBarButtonItem = editButton
+        }
+    }
+    
+    func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false   //검색 시 배경을 흐리게 처리하지 않도록
+        searchController.searchBar.placeholder = "검색"
+        searchController.searchBar.autocapitalizationType = .none
+        navigationItem.searchController = searchController
+        definesPresentationContext = true   //현재 뷰 컨트롤러 내에서 검색 결과가 표시되도록 하는 설정
     }
     
     func setupUI() {
@@ -80,14 +110,6 @@ class MemoViewController: UIViewController {
         clearButton.tintColor = .red
         
         setupToolbarItems()
-    }
-    
-    func setupTableview() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.allowsMultipleSelectionDuringEditing = true
-        
-        tableView.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
     }
     
     func setupToolbarItems() {
@@ -122,14 +144,6 @@ class MemoViewController: UIViewController {
             }
         }
         toolBar.setItems(items, animated: true)
-    }
-    
-    func setupNavigationBar() {
-        if memos.isEmpty {
-            self.navigationItem.rightBarButtonItem = nil
-        } else {
-            self.navigationItem.rightBarButtonItem = editButton
-        }
     }
     
     @objc func editButtonTapped(_ sender: UIBarButtonItem) {
@@ -247,20 +261,57 @@ class MemoViewController: UIViewController {
 
 }
 
+extension MemoViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let searchText = searchController.searchBar.text ?? ""
+        filterContentForSearchText(searchText)
+    }
+    
+    func filterContentForSearchText(_ searchText: String) {
+        filteredMemos = filterMemos(for: searchText)
+        tableView.reloadData()
+    }
+    
+    func filterMemos(for searchText: String) -> [Memo] {
+        return memos.filter { memo in
+            let text = memo.text ?? ""
+            if let _ = memo.password {
+                // 암호가 걸려있으면, 텍스트의 첫 줄만 검색 대상
+                let firstLine = text.components(separatedBy: "\n").first ?? ""
+                return firstLine.localizedCaseInsensitiveContains(searchText)
+            } else {
+                // 암호가 없는 메모는 전체 텍스트를 검색
+                return text.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
+    func isFiltering() -> Bool {
+        return searchController.isActive && !(searchController.searchBar.text?.isEmpty ?? true)
+    }
+}
+
 extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
     //DataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let myFolder = myFolder else { return 0 }
-        return coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder).count
+        if isFiltering() {
+            return filteredMemos.count
+        } else {
+            return memos.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: Cell.memoCellIdentifier, for: indexPath) as! MemoCell
         
-        guard let myFolder = myFolder else { return cell }
+        let memo: Memo
+        if isFiltering() {
+            memo = filteredMemos[indexPath.row]
+        } else {
+            memo = memos[indexPath.row]
+        }
         
-        let memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
-        cell.memo = memos[indexPath.row]
+        cell.memo = memo
         cell.selectionStyle = .none
         
         return cell
