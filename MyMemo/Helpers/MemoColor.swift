@@ -27,7 +27,7 @@ enum MemoColor: Int64 {
             return UIColor(red: 0.65, green: 0.78, blue: 0.91, alpha: 1.00)
         case .purple:
             return UIColor(red: 0.90, green: 0.90, blue: 0.98, alpha: 1.00)
-        case .base:
+        case .base: //FFFFF0
             return UIColor(red: 1.00, green: 1.00, blue: 0.94, alpha: 1.00)
         }
     }
