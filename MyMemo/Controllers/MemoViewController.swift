@@ -59,6 +59,7 @@ class MemoViewController: UIViewController {
     var filteredMemos: [Memo] = []
     
     var myFolder: Folder?
+    var folderNameList: Set<String> = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -145,16 +146,25 @@ class MemoViewController: UIViewController {
     }
     
     func updateActionOfMenuButton() {
-        let menu = UIMenu(children: [
-            UIAction(title: "이름 변경", image: UIImage(systemName: "pencil"), handler: self.renameButtonTapped),
-            UIAction(title: "메모 선택", image: UIImage(systemName: "checkmark.circle"), attributes: memos.isEmpty ? [.disabled] : [], handler: self.editButtonTapped)
-        ])
+        guard let myFolder = myFolder else { return }
+        
+        var menu: UIMenu
+        if myFolder.name == "기본 폴더" || myFolder.name == "휴지통" {
+            menu = UIMenu(children: [UIAction(title: "메모 선택", image: UIImage(systemName: "checkmark.circle"), attributes: memos.isEmpty ? [.disabled] : [], handler: self.editButtonTapped)])
+        }
+        else {
+            menu = UIMenu(children: [
+                UIAction(title: "이름 변경", image: UIImage(systemName: "pencil"), handler: self.renameButtonTapped),
+                UIAction(title: "메모 선택", image: UIImage(systemName: "checkmark.circle"), attributes: memos.isEmpty ? [.disabled] : [], handler: self.editButtonTapped)
+            ])
+        }
 
         menuButton.menu = menu
     }
     
     func renameButtonTapped(_ action: UIAction) {
         guard let myFolder = myFolder else { return }
+        folderNameList = Set(coreDataManager.getFolderListFromCoreData().map { $0.name ?? "" })
         
         let alert = UIAlertController(title: "폴더 이름 변경", message: nil, preferredStyle: .alert)
         alert.addTextField { tf in
@@ -183,7 +193,6 @@ class MemoViewController: UIViewController {
               let folderName = textField.text,
               let addAction = alert.actions.first(where: { $0.title == "확인" }) else { return }
         
-        let folderNameList = Set(coreDataManager.getFolderListFromCoreData().map { $0.name ?? "" })
         let folderAlreadyExists = folderNameList.contains { $0.caseInsensitiveCompare(folderName) == .orderedSame }
         
         if folderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
