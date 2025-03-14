@@ -9,14 +9,16 @@ import UIKit
 
 class MemoViewController: UIViewController {
 
-    @IBOutlet weak var tableView: UITableView!
-    
-    @IBOutlet weak var toolBar: UIToolbar!
-    private lazy var editButton: UIBarButtonItem = {
-        let button = UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(editButtonTapped))
+    let menuButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"))
+    private lazy var doneButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(doneButtonTapped))
         return button
     }()
     
+    @IBOutlet weak var tableView: UITableView!
+    
+    @IBOutlet weak var toolBar: UIToolbar!
+
     //left button 편집 모드일 때만 활성화
     private lazy var moveButton: UIBarButtonItem = {
         let button = UIBarButtonItem(title: "이동", style: .plain, target: self, action: #selector(moveButtonTapped))
@@ -62,10 +64,21 @@ class MemoViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        setupTableview()
-        fetchMemos()
         setupSearchController()
+        setupTableview()
         setupUI()
+        fetchMemos()
+        setupToolbarItems()
+    }
+    
+    func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false   //검색 시 배경을 흐리게 처리하지 않도록
+        searchController.searchBar.placeholder = "검색"
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.setValue("취소", forKey: "cancelButtonText") //cancel 타이틀 변경
+        navigationItem.searchController = searchController
+        definesPresentationContext = true   //현재 뷰 컨트롤러 내에서 검색 결과가 표시되도록 하는 설정
     }
     
     func setupTableview() {
@@ -76,46 +89,30 @@ class MemoViewController: UIViewController {
         tableView.backgroundColor = MemoColor.base.backgroundColor
     }
     
-    func fetchMemos() {
-        guard let myFolder = myFolder else { return }
-        memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
-        
-        tableView.reloadData()
-        setupRightBarButton()
-    }
-    
-    func setupRightBarButton() {
-        if memos.isEmpty {
-            self.navigationItem.rightBarButtonItem = nil
-        } else {
-            self.navigationItem.rightBarButtonItem = editButton
-        }
-    }
-    
-    func setupSearchController() {
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false   //검색 시 배경을 흐리게 처리하지 않도록
-        searchController.searchBar.placeholder = "검색"
-        searchController.searchBar.autocapitalizationType = .none
-        searchController.searchBar.setValue("취소", forKey: "cancelButtonText")
-        navigationItem.searchController = searchController
-        definesPresentationContext = true   //현재 뷰 컨트롤러 내에서 검색 결과가 표시되도록 하는 설정
-    }
-    
     func setupUI() {
         guard let myFolder = myFolder else { return }
         self.title = myFolder.name
         
         view.backgroundColor = MemoColor.base.backgroundColor
         toolBar.barTintColor = MemoColor.base.backgroundColor
-        clearButton.tintColor = .red
+        clearButton.tintColor = .red    //휴지통 한정
         
-        setupToolbarItems()
+        navigationItem.rightBarButtonItem = menuButton
+        updateActionOfMenuButton()
+    }
+    
+    func fetchMemos() {
+        guard let myFolder = myFolder else { return }
+        memos = coreDataManager.getMemoListFromCoreData(selectedFolder: myFolder)
+        
+        tableView.reloadData()
+        updateActionOfMenuButton()
     }
     
     func setupToolbarItems() {
         guard let myFolder = myFolder else { return }
         guard var items = toolBar.items else { return }
+        
         if myFolder.isTrash { //휴지통일 때
             if memos.isEmpty {
                 items = []
@@ -147,17 +144,66 @@ class MemoViewController: UIViewController {
         toolBar.setItems(items, animated: true)
     }
     
-    @objc func editButtonTapped(_ sender: UIBarButtonItem) {
-        setEditing(!tableView.isEditing, animated: true)
-        /*
-        if tableView.isEditing { //편집 종료
-            editButton.title = "편집"
-            setEditing(false, animated: true)
-        } else { //편집모드 활성화
-            editButton.title = "완료"
-            setEditing(true, animated: true)
+    func updateActionOfMenuButton() {
+        let menu = UIMenu(children: [
+            UIAction(title: "이름 변경", image: UIImage(systemName: "pencil"), handler: self.renameButtonTapped),
+            UIAction(title: "메모 선택", image: UIImage(systemName: "checkmark.circle"), attributes: memos.isEmpty ? [.disabled] : [], handler: self.editButtonTapped)
+        ])
+
+        menuButton.menu = menu
+    }
+    
+    func renameButtonTapped(_ action: UIAction) {
+        guard let myFolder = myFolder else { return }
+        
+        let alert = UIAlertController(title: "폴더 이름 변경", message: nil, preferredStyle: .alert)
+        alert.addTextField { tf in
+            tf.text = myFolder.name
+            tf.clearButtonMode = .whileEditing
+            tf.addTarget(self, action: #selector(self.folderNameChanged), for: .editingChanged)
         }
-         */
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            
+            if let newName = alert.textFields?[0].text {
+                self.coreDataManager.updateFolderName(folder: myFolder, newName: newName) {
+                    
+                }
+                self.title = newName
+            }
+        }))
+        
+        // 현재 뷰 컨트롤러에서 alert 표시
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc func folderNameChanged(_ textField: UITextField) {
+        guard let alert = self.presentedViewController as? UIAlertController,
+              let folderName = textField.text,
+              let addAction = alert.actions.first(where: { $0.title == "확인" }) else { return }
+        
+        let folderNameList = Set(coreDataManager.getFolderListFromCoreData().map { $0.name ?? "" })
+        let folderAlreadyExists = folderNameList.contains { $0.caseInsensitiveCompare(folderName) == .orderedSame }
+        
+        if folderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            addAction.isEnabled = false
+            alert.message = "유효하지 않은 폴더명"
+        } else if folderAlreadyExists {
+            addAction.isEnabled = false
+            alert.message = "중복된 폴더명"
+        } else {
+            addAction.isEnabled = true
+            alert.message = ""
+        }
+    }
+    
+    @objc func doneButtonTapped() {
+        setEditing(!tableView.isEditing, animated: true)
+    }
+    
+    func editButtonTapped(_ action: UIAction) {
+        setEditing(!tableView.isEditing, animated: true)
     }
     
     @objc func moveButtonTapped() {
@@ -446,7 +492,7 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
-        editButton.title = editing ? "완료" : "편집"
+        navigationItem.rightBarButtonItem = editing ? doneButton : menuButton
         tableView.setEditing(editing, animated: animated)
         setupToolbarItems()
     }

@@ -237,6 +237,7 @@ class DetailViewController: UIViewController {
         let ok = UIAlertAction(title: "확인", style: .default) { [weak self] action in
             guard let self = self else { return }
             memo.password = nil
+            memo.hint = nil
             self.coreDataManager.updateMemo(memo: memo) {
                 
             }

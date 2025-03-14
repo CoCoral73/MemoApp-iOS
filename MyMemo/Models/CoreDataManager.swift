@@ -50,6 +50,10 @@ final class CoreDataManager {
             } catch {
                 print("초기 데이터 생성 에러: \(error.localizedDescription)")
             }
+            
+            if let storeUrl = context.persistentStoreCoordinator?.persistentStores.first?.url {
+                print("Core Data 저장소 위치: \(storeUrl)")
+            }
         }
     }
     
@@ -117,8 +121,21 @@ final class CoreDataManager {
     }
     
     //폴더명 수정
-    func updateFolderName(newName: String?, completionHandler: @escaping () -> Void) {
+    func updateFolderName(folder: Folder, newName: String?, completionHandler: @escaping () -> Void) {
+        guard let date = folder.date else {
+            completionHandler()
+            return
+        }
         
+        if let context = context {
+            folder.name = newName
+            
+            do {
+                try context.save()
+            } catch {
+                print("updateFolderName 컨텍스트 저장 에러: \(error.localizedDescription)")
+            }
+        }
         
     }
     
@@ -131,33 +148,23 @@ final class CoreDataManager {
         guard let trashFolder = getOrCreateTrashFolder() else { return }
         
         if let context = context {
-            let request: NSFetchRequest<Folder> = Folder.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
-            
-            do {
-                let fetchedList = try context.fetch(request)
-                if let targetFolder = fetchedList.first {
-                    //폴더 안의 메모는 휴지통으로 이동
-                    if let memosSet = targetFolder.memos as? Set<Memo> {
-                        memosSet.sorted { return ($0.date ?? Date.distantFuture) < ($1.date ?? Date.distantFuture) }.forEach { memo in
-                            memo.folder = trashFolder
-                            memo.deletedDate = Date()
-                        }
-                    }
-                    
-                    context.delete(targetFolder)
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("deleteFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if let memosSet = folder.memos as? Set<Memo> {
+                memosSet.sorted { return ($0.date ?? Date.distantFuture) < ($1.date ?? Date.distantFuture) }.forEach { memo in
+                    memo.folder = trashFolder
+                    memo.deletedDate = Date()
                 }
-            } catch {
-                print("폴더 삭제 에러: \(error.localizedDescription)")
             }
+            
+            context.delete(folder)
+            
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("deleteFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
+                }
+            }
+            
             completionHandler()
         }
     }
@@ -219,24 +226,13 @@ final class CoreDataManager {
         }
         
         if let context = context {
-            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
             
-            do {
-                let fetchedList = try context.fetch(request)
-                if var targetMemo = fetchedList.first {
-                    targetMemo = memo
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("updateMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("updateMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                 }
-            } catch {
-                print("메모 수정 에러: \(error.localizedDescription)")
             }
             
             completionHandler()
@@ -252,26 +248,17 @@ final class CoreDataManager {
         guard let trashFolder = getOrCreateTrashFolder() else { return }
 
         if let context = context {
-            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
+            memo.folder = trashFolder
+            memo.deletedDate = Date()
             
-            do {
-                let fetchedList = try context.fetch(request)
-                if let targetMemo = fetchedList.first {
-                    targetMemo.folder = trashFolder
-                    targetMemo.deletedDate = Date()
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("removeMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("removeMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                 }
-            } catch {
-                print(error.localizedDescription)
             }
+            
             completionHandler()
         }
     }
@@ -284,24 +271,14 @@ final class CoreDataManager {
         }
 
         if let context = context {
-            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
+            context.delete(memo)
             
-            do {
-                let fetchedList = try context.fetch(request)
-                if let targetMemo = fetchedList.first {
-                    context.delete(targetMemo)
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("deleteEmptyMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("deleteEmptyMemo 컨텍스트 저장 에러: \(error.localizedDescription)")
                 }
-            } catch {
-                print("빈 메모 삭제 에러: \(error.localizedDescription)")
             }
             
             completionHandler()
@@ -317,29 +294,19 @@ final class CoreDataManager {
         guard let trashFolder = getOrCreateTrashFolder() else { return }
         
         if let context = context {
-            let request: NSFetchRequest<Folder> = Folder.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
-            
-            do {
-                let fetchedList = try context.fetch(request)
-                if let targetFolder = fetchedList.first {
-                    if let memosSet = targetFolder.memos as? Set<Memo> {
-                        memosSet.sorted { return ($0.date ?? Date.distantFuture) < ($1.date ?? Date.distantFuture) }.forEach { memo in
-                            memo.folder = trashFolder
-                            memo.deletedDate = Date()
-                        }
-                    }
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("removeAllMemoFromFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if let memosSet = folder.memos as? Set<Memo> {
+                memosSet.sorted { return ($0.date ?? Date.distantFuture) < ($1.date ?? Date.distantFuture) }.forEach { memo in
+                    memo.folder = trashFolder
+                    memo.deletedDate = Date()
                 }
-            } catch {
-                print("메모 전체 삭제 에러: \(error.localizedDescription)")
+            }
+            
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("removeAllMemoFromFolder 컨텍스트 저장 에러: \(error.localizedDescription)")
+                }
             }
             
             completionHandler()
@@ -354,24 +321,14 @@ final class CoreDataManager {
         }
         
         if let context = context {
-            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
-            request.predicate = NSPredicate(format: "date = %@", date as CVarArg)
+            context.delete(memo)
             
-            do {
-                let fetchedList = try context.fetch(request)
-                if let targetMemo = fetchedList.first {
-                    context.delete(targetMemo)
-                    
-                    if context.hasChanges {
-                        do {
-                            try context.save()
-                        } catch {
-                            print("deleteMemoFromTrash 컨텍스트 저장 에러: \(error.localizedDescription)")
-                        }
-                    }
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    print("deleteMemoFromTrash 컨텍스트 저장 에러: \(error.localizedDescription)")
                 }
-            } catch {
-                print("휴지통 메모 삭제 에러: \(error.localizedDescription)")
             }
             
             completionHandler()
@@ -425,23 +382,6 @@ final class CoreDataManager {
                 }
                 print("만료된 메모 \(expiredMemos.count)개 삭제 완료")
             }
-            
-            /*
-            let request: NSFetchRequest<Memo> = Memo.fetchRequest()
-            // 휴지통에 있고, deletedDate가 thresholdDate보다 이전인 메모를 찾음
-            request.predicate = NSPredicate(format: "folder.isTrash == true AND deletedDate <= %@", before30days as NSDate)
-            
-            do {
-                let oldTrashMemos = try context.fetch(request)
-                for memo in oldTrashMemos {
-                    context.delete(memo)
-                }
-                try context.save()
-                print("오래된 휴지통 메모 \(oldTrashMemos.count)개 삭제 완료")
-            } catch {
-                print("휴지통 메모 삭제 에러: \(error.localizedDescription)")
-            }
-            */
         }
     }
 }
