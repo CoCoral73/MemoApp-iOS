@@ -40,6 +40,8 @@ class FolderCell: UITableViewCell {
         
         guard let folder = self.folder else { return }
         let memos = folder.memos
+        
+        self.contentView.backgroundColor = .white
         iconImageView.image = UIImage(systemName: folder.imageName ?? "folder")
         titleLabel.text = folder.name
         subtitleLabel.text = "\(memos == nil ? 0 : memos!.count)"
