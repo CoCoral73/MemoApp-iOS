@@ -51,6 +51,7 @@ class FolderViewController: UIViewController {
         self.title = "폴더"
         
         toolBar.barTintColor = MemoColor.base.backgroundColor
+        toolBar.isTranslucent = false
         toolBar.setItems([editButton, flexibleSpace, addButton], animated: true)
         
         if let navigationBar = navigationController?.navigationBar {

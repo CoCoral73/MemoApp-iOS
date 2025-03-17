@@ -41,10 +41,10 @@ class FolderCell: UITableViewCell {
         guard let folder = self.folder else { return }
         let memos = folder.memos
         
-        self.contentView.backgroundColor = .white
         iconImageView.image = UIImage(systemName: folder.imageName ?? "folder")
         titleLabel.text = folder.name
         subtitleLabel.text = "\(memos == nil ? 0 : memos!.count)"
+        subtitleLabel.textColor = .darkGray
         
         if editing {
             if self.folder?.name == "기본 폴더" || self.folder?.name == "휴지통" {
@@ -54,7 +54,7 @@ class FolderCell: UITableViewCell {
                 self.iconImageView.tintColor = .systemOrange
                 self.titleLabel.textColor = .label
             }
-            self.subtitleLabel?.isHidden = editing
+            self.subtitleLabel.isHidden = editing
             self.accessoryType = .none
         } else {
             self.iconImageView.tintColor = .systemOrange // 또는 원래 색상

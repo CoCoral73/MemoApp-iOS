@@ -96,6 +96,7 @@ class MemoViewController: UIViewController {
         
         view.backgroundColor = MemoColor.base.backgroundColor
         toolBar.barTintColor = MemoColor.base.backgroundColor
+        toolBar.isTranslucent = false
         clearButton.tintColor = .red    //휴지통 한정
         
         navigationItem.rightBarButtonItem = menuButton
