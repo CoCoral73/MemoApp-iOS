@@ -273,13 +273,9 @@ class MemoViewController: UIViewController {
                     guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
                     guard let memo = cell.memo else { return }
                     if myFolder.isTrash {
-                        self.coreDataManager.deleteMemoFromTrash(memo: memo) {
-                            
-                        }
+                        self.coreDataManager.deleteMemoFromTrash(memo: memo) { }
                     } else {
-                        self.coreDataManager.removeMemo(memo: memo) {
-                            
-                        }
+                        self.coreDataManager.removeMemo(memo: memo) { }
                     }
                 }
             }
@@ -383,14 +379,16 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
         
         let memo = memos[indexPath.row]
         if let pw = memo.password, let hint = memo.hint {
-            let alert = createAskingPWAlert(count: 0, password: pw, hint: hint, indexPath: indexPath)
+            let alert = createAskingPWAlert(count: 0, password: pw, hint: hint, indexPath: indexPath) {
+                self.performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
+            }
             present(alert, animated: true, completion: nil)
         } else {
             performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
         }
     }
     
-    func createAskingPWAlert(count: Int, password: String?, hint: String, indexPath: IndexPath) -> UIAlertController {
+    func createAskingPWAlert(count: Int, password: String?, hint: String, indexPath: IndexPath, okHandler: @escaping () -> Void) -> UIAlertController {
         let msg1 = "해당 메모의 암호를 입력하세요.", msg2 = "잘못된 암호입니다. 다시 입력하세요.", msg3 = "\nHINT: \(hint)"
         var message = ""
         if count == 0 {
@@ -411,9 +409,11 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
         let success = UIAlertAction(title: "확인", style: .default) { action in
             let inputPW = alert.textFields?[0].text
             if inputPW == password {
-                self.performSegue(withIdentifier: Segue.memoToDetailIdentifier, sender: indexPath)
+                okHandler()
             } else {
-                let wrongAlert = self.createAskingPWAlert(count: count + 1, password: password, hint: hint, indexPath: indexPath)
+                let wrongAlert = self.createAskingPWAlert(count: count + 1, password: password, hint: hint, indexPath: indexPath) {
+                    okHandler()
+                }
                 self.present(wrongAlert, animated: true, completion: nil)
             }
         }
@@ -469,6 +469,19 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
                 }
             }
         }
+        
+        if segue.identifier == Segue.lockMemoInMemoIdentifier {
+            guard let indexPath = sender as? IndexPath else { return }
+            
+            let lockVC = segue.destination as! LockViewController
+            guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
+            guard let memo = cell.memo else { return }
+            lockVC.memo = memo
+            lockVC.completionLock = { [weak self] (sender) in
+                guard let self = self else { return }
+                self.tableView.reloadData()
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
@@ -507,4 +520,114 @@ extension MemoViewController: UITableViewDelegate, UITableViewDataSource {
         setupToolbarItems()
     }
     
+    // UITableViewDelegate를 채택한 ViewController 내부에 구현
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let myFolder = myFolder else { return nil }
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            
+            if myFolder.isTrash {
+                let action1 = UIAction(title: "메모 이동", image: UIImage(systemName: "folder")) { [weak self] action in
+                    guard let self = self else { return }
+                    guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
+                    guard let memo = cell.memo else { return }
+                    
+                    self.performSegue(withIdentifier: Segue.moveMemoInMemoViewIdentifier, sender: [memo])
+                }
+                let action2 = UIAction(title: "메모 삭제", image: UIImage(systemName: "trash")?.withTintColor(.red, renderingMode: .alwaysOriginal)) { [weak self] action in
+                    guard let self = self else { return }
+                    
+                    let alert = UIAlertController(title: "선택된 메모 영구 삭제", message: "이 동작은 실행 취소할 수 없습니다.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                    alert.addAction(UIAlertAction(title: "영구 삭제", style: .destructive, handler: { [weak self] _ in
+                        guard let self = self else { return }
+                    
+                        guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
+                        guard let memo = cell.memo else { return }
+                        self.coreDataManager.deleteMemoFromTrash(memo: memo) { }
+                        
+                        self.fetchMemos()
+                        self.tableView.reloadData()
+                        if self.memos.isEmpty {
+                            self.setEditing(false, animated: true)
+                        } else {
+                            self.setupToolbarItems()
+                        }
+                    }))
+                    
+                    // 현재 뷰 컨트롤러에서 alert 표시
+                    self.present(alert, animated: true, completion: nil)
+                }
+                
+                // UIMenu 생성
+                return UIMenu(children: [action1, action2])
+            } else {
+                // 메뉴에 포함될 액션 생성
+                let action1: UIAction
+                if let cell = tableView.cellForRow(at: indexPath) as? MemoCell, let memo = cell.memo, let password = memo.password {
+                    action1 = UIAction(title: "메모 잠금 해제", image: UIImage(systemName: "lock.open")) { [weak self] action in
+                        guard let self = self else { return }
+                        let alert = createAskingPWAlert(count: 0, password: password, hint: memo.hint!, indexPath: indexPath) {
+                            let alert = UIAlertController(title: "잠금 해제", message: "해당 메모의 잠금을 해제하겠습니까?", preferredStyle: .alert)
+                        
+                            let ok = UIAlertAction(title: "확인", style: .default) { [weak self] action in
+                                guard let self = self else { return }
+                                memo.password = nil
+                                memo.hint = nil
+                                self.coreDataManager.updateMemo(memo: memo) {
+                                    self.tableView.reloadData()
+                                }
+                            }
+                            let cancel = UIAlertAction(title: "취소", style: .cancel)
+                            
+                            alert.addAction(ok)
+                            alert.addAction(cancel)
+                            self.present(alert, animated: true, completion: nil)
+                        }
+                        present(alert, animated: true, completion: nil)
+                    }
+                } else {
+                    action1 = UIAction(title: "메모 잠금", image: UIImage(systemName: "lock")) { [weak self] action in
+                        guard let self = self else { return }
+                        self.performSegue(withIdentifier: Segue.lockMemoInMemoIdentifier, sender: indexPath)
+                    }
+                }
+                let action2 = UIAction(title: "메모 이동", image: UIImage(systemName: "folder")) { [weak self] action in
+                    guard let self = self else { return }
+                    guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
+                    guard let memo = cell.memo else { return }
+                    
+                    self.performSegue(withIdentifier: Segue.moveMemoInMemoViewIdentifier, sender: [memo])
+                }
+                let action3 = UIAction(title: "메모 삭제", image: UIImage(systemName: "trash")?.withTintColor(.red, renderingMode: .alwaysOriginal)) { [weak self] action in
+                    guard let self = self else { return }
+                    
+                    let alert = UIAlertController(title: "선택된 메모 삭제", message: "삭제한 메모는 휴지통으로 이동됩니다.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { [weak self] _ in
+                        guard let self = self else { return }
+                    
+                        guard let cell = tableView.cellForRow(at: indexPath) as? MemoCell else { return }
+                        guard let memo = cell.memo else { return }
+                        self.coreDataManager.removeMemo(memo: memo) { }
+                        
+                        self.fetchMemos()
+                        self.tableView.reloadData()
+                        if self.memos.isEmpty {
+                            self.setEditing(false, animated: true)
+                        } else {
+                            self.setupToolbarItems()
+                        }
+                    }))
+                    
+                    // 현재 뷰 컨트롤러에서 alert 표시
+                    self.present(alert, animated: true, completion: nil)
+                }
+                
+                // UIMenu 생성
+                return UIMenu(children: [action1, action2, action3])
+            }
+        }
+    }
+
 }

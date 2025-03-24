@@ -11,6 +11,8 @@ class LockViewController: UIViewController {
     
     let coreDataManager = CoreDataManager.shared
     
+    @IBOutlet weak var saveButton: UIBarButtonItem!
+    
     @IBOutlet weak var pwTf1: UITextField!
     @IBOutlet weak var pwTf2: UITextField!
     @IBOutlet weak var pwLabel: UILabel!
@@ -25,12 +27,26 @@ class LockViewController: UIViewController {
         setupTextField()
         view.backgroundColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.00)
         pwLabel.isHidden = true
+        saveButton.isEnabled = false
     }
     
     func setupTextField() {
         pwTf1.delegate = self
         pwTf2.delegate = self
         hintTf.delegate = self
+        
+        pwTf1.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        pwTf2.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        
+        pwTf1.becomeFirstResponder()
+    }
+    
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        if let text1 = pwTf1.text, let text2 = pwTf2.text, !text1.isEmpty && !text2.isEmpty {
+            saveButton.isEnabled = true
+        } else {
+            saveButton.isEnabled = false
+        }
     }
 
     @IBAction func cancelButtonTapped(_ sender: UIBarButtonItem) {
@@ -42,7 +58,7 @@ class LockViewController: UIViewController {
         
         if pwTf1.text == pwTf2.text {
             memo.password = pwTf2.text
-            memo.hint = hintTf.text
+            memo.hint = hintTf.text ?? ""
             coreDataManager.updateMemo(memo: memo) {
                 
             }

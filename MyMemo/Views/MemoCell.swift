@@ -27,6 +27,7 @@ class MemoCell: UITableViewCell {
     func configureUI() {
         backView.clipsToBounds = true
         backView.layer.cornerRadius = 8
+        self.backgroundColor = MemoColor.base.backgroundColor
     }
     
     func configureUIwithData() {

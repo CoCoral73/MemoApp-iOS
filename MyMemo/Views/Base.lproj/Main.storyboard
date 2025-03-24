@@ -191,6 +191,7 @@
                         <outlet property="toolBar" destination="FEd-ZL-IaJ" id="fUG-A1-dxj"/>
                         <segue destination="8re-0f-8HR" kind="show" identifier="MemoToDetail" id="YZI-3x-Rq7"/>
                         <segue destination="JPH-7w-FdW" kind="presentation" identifier="MoveInMemoView" id="NSj-54-M8x"/>
+                        <segue destination="GSa-0H-KYe" kind="presentation" identifier="LockMemoInMemo" id="FRx-MA-41w"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EWk-tz-01N" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -286,7 +287,7 @@
                         <outlet property="textView" destination="19x-Oc-1tv" id="Qyu-kt-98r"/>
                         <outlet property="yellowButton" destination="J9d-GC-fz7" id="6Wz-H9-Fs9"/>
                         <segue destination="JPH-7w-FdW" kind="presentation" identifier="MoveInDetailView" id="pwr-Qr-TcE"/>
-                        <segue destination="GSa-0H-KYe" kind="presentation" identifier="LockMemo" id="HTt-17-fKa"/>
+                        <segue destination="GSa-0H-KYe" kind="presentation" identifier="LockMemoInDetail" id="HTt-17-fKa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vE2-28-8iM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -409,11 +410,12 @@
                         <outlet property="pwLabel" destination="7ba-9h-hYZ" id="5Vf-kw-k96"/>
                         <outlet property="pwTf1" destination="h8t-Uc-aZ9" id="DQG-1D-hJl"/>
                         <outlet property="pwTf2" destination="2ah-XB-aFK" id="v2x-7g-f87"/>
+                        <outlet property="saveButton" destination="SXF-Qw-nmi" id="Kq4-l4-OFv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KwB-1v-89n" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3630" y="-56"/>
+            <point key="canvasLocation" x="2239" y="-938"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="hZ9-YC-rUu">
@@ -542,6 +544,7 @@
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="NSj-54-M8x"/>
+        <segue reference="FRx-MA-41w"/>
     </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="labelColor">
