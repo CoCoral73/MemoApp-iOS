@@ -88,6 +88,22 @@ class MemoViewController: UIViewController {
         tableView.allowsMultipleSelectionDuringEditing = true
         
         tableView.backgroundColor = MemoColor.base.backgroundColor
+        
+        guard let myFolder = myFolder else { return }
+        if myFolder.isTrash {
+            let headerLabel = UILabel()
+            headerLabel.text = "휴지통에 있는 메모는 30일이 지나면 영구 삭제됩니다."
+            headerLabel.textAlignment = .center
+            headerLabel.font = UIFont.systemFont(ofSize: 14)
+            headerLabel.textColor = .gray
+            headerLabel.numberOfLines = 0
+            
+            // 레이블 크기 지정 (오토레이아웃 사용해도 됨)
+            headerLabel.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 18)
+            
+            // 테이블 뷰의 헤더로 설정
+            tableView.tableHeaderView = headerLabel
+        }
     }
     
     func setupUI() {
