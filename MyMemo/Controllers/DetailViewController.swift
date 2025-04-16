@@ -183,7 +183,7 @@ class DetailViewController: UIViewController {
         
         // iPad의 경우 popoverPresentationController 설정 필요
         if let popover = activityViewController.popoverPresentationController {
-            popover.barButtonItem = self.navigationItem.rightBarButtonItem
+            popover.barButtonItem = self.navigationItem.rightBarButtonItems?.last
         }
         
         present(activityViewController, animated: true, completion: nil)
